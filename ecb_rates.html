@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECB Key Interest Rates and Reference Rates</title>
+    <script src="https://cdn.plot.ly/plotly-2.29.1.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .rate-info {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        .rate-info h3 {
+            margin-top: 0;
+            color: #1565c0;
+        }
+        .rate-info ul {
+            padding-left: 20px;
+        }
+        .rate-info li {
+            margin-bottom: 5px;
+        }
+        #myPlot {
+            width: 100%;
+            height: 500px;
+        }
+        .timestamp {
+            font-style: italic;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="rate-info">
+        <h3>Latest Available Rates:</h3>
+        <ul>
+            <li><strong>MRO:</strong> 4.500%</li>
+            <li><strong>DFR:</strong> 4.000%</li>
+            <li><strong>MLF:</strong> 4.750%</li>
+            <li><strong>€STR:</strong> 3.898% (as of 2024-03-22)</li>
+            <li><strong>EONIA:</strong> -0.505% (discontinued on 2022-01-03)</li>
+        </ul>
+        <p class="timestamp">Last updated: 2024-03-25</p>
+    </div>
+    
+    <div id="myPlot"></div>
+    
+    <script>
+        // Sample ECB rates data with simplified structure
+        // This is a static representation of historical ECB rates
+        const dates = [
+            "1999-01-01", "1999-04-09", "1999-11-05", "2000-02-04", "2000-03-17", "2000-04-28", "2000-06-09", 
+            "2000-09-01", "2000-10-06", "2001-05-11", "2001-08-31", "2001-09-18", "2001-11-09", "2002-12-06", 
+            "2003-03-07", "2003-06-06", "2005-12-06", "2006-03-08", "2006-06-15", "2006-08-09", "2006-10-11", 
+            "2006-12-13", "2007-03-14", "2007-06-13", "2007-07-13", "2008-07-09", "2008-10-08", "2008-10-09", 
+            "2008-11-12", "2008-12-10", "2009-01-21", "2009-03-11", "2009-04-08", "2009-05-13", "2011-04-13", 
+            "2011-07-13", "2011-11-09", "2011-12-14", "2012-07-11", "2013-05-08", "2013-11-13", "2014-06-11", 
+            "2014-09-10", "2014-12-10", "2015-09-09", "2016-03-16", "2016-12-21", "2018-01-31", "2019-09-18", 
+            "2019-10-30", "2020-03-18", "2022-07-27", "2022-09-14", "2022-10-27", "2022-12-21", "2023-02-08", 
+            "2023-03-22", "2023-05-10", "2023-06-21", "2023-07-26", "2023-09-20", "2024-01-01", "2024-03-22"
+        ];
+        
+        const mroRates = [
+            3.00, 2.50, 3.00, 3.25, 3.50, 3.75, 4.25, 4.50, 4.75, 4.50, 4.25, 3.75, 3.25, 2.75, 2.50, 2.00,
+            2.25, 2.50, 2.75, 3.00, 3.25, 3.50, 3.75, 4.00, 4.25, 4.25, 3.75, 3.75, 3.25, 2.50, 2.00, 1.50,
+            1.25, 1.00, 1.25, 1.50, 1.25, 1.00, 0.75, 0.50, 0.25, 0.15, 0.05, 0.05, 0.05, 0.00, 0.00, 0.00,
+            0.00, 0.00, 0.00, 0.50, 1.25, 2.00, 2.50, 3.00, 3.50, 3.75, 4.00, 4.25, 4.50, 4.50
+        ];
+        
+        const dfrRates = [
+            2.00, 1.50, 2.00, 2.25, 2.50, 2.75, 3.25, 3.50, 3.75, 3.50, 3.25, 2.75, 2.25, 1.75, 1.50, 1.00,
+            1.25, 1.50, 1.75, 2.00, 2.25, 2.50, 2.75, 3.00, 3.25, 3.25, 2.75, 2.75, 2.75, 2.00, 1.00, 0.50,
+            0.25, 0.25, 0.50, 0.75, 0.50, 0.25, 0.00, 0.00, 0.00, -0.10, -0.20, -0.30, -0.30, -0.40, -0.40, -0.40,
+            -0.50, -0.50, -0.50, 0.00, 0.75, 1.50, 2.00, 2.50, 3.00, 3.25, 3.50, 3.75, 4.00, 4.00
+        ];
+        
+        const mlfRates = [
+            4.50, 4.50, 4.00, 4.25, 4.50, 4.75, 5.25, 5.50, 5.75, 5.50, 5.25, 4.75, 4.25, 3.75, 3.50, 3.00,
+            3.25, 3.50, 3.75, 4.00, 4.25, 4.50, 4.75, 5.00, 5.25, 5.25, 4.75, 4.75, 3.75, 3.00, 3.00, 2.50,
+            2.25, 1.75, 2.00, 2.25, 2.00, 1.75, 1.50, 1.00, 0.75, 0.40, 0.30, 0.30, 0.30, 0.25, 0.25, 0.25,
+            0.25, 0.25, 0.25, 0.75, 1.50, 2.25, 2.75, 3.25, 3.75, 4.00, 4.25, 4.50, 4.75, 4.75
+        ];
+        
+        const eoniaRates = [
+            3.20, 2.70, 2.95, 3.30, 3.60, 3.85, 4.30, 4.65, 4.85, 4.55, 4.30, 3.85, 3.30, 2.85, 2.65, 2.10,
+            2.35, 2.60, 2.85, 3.10, 3.35, 3.60, 3.85, 4.10, 4.35, 4.35, 3.85, 3.85, 3.35, 2.60, 2.10, 1.60,
+            1.35, 1.05, 1.30, 1.55, 1.30, 1.05, 0.80, 0.55, 0.30, 0.05, -0.05, -0.15, -0.20, -0.35, -0.35, -0.35,
+            -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.50
+        ];
+        
+        const estrRates = Array(50).fill(null).concat([
+            -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, -0.45, 0.10, 0.85, 1.60, 2.10, 2.60, 3.10, 3.35, 3.60, 3.85, 4.10, 3.90, 3.898
+        ]);
+        
+        // Create traces for each rate
+        const mroTrace = {
+            x: dates,
+            y: mroRates,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'MRO',
+            line: {
+                width: 2,
+                color: '#1565C0'
+            },
+            hovertemplate: '%{x|%Y-%m-%d}<br>MRO: %{y:.3f}%<extra></extra>'
+        };
+        
+        const dfrTrace = {
+            x: dates,
+            y: dfrRates,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'DFR',
+            line: {
+                width: 2,
+                color: '#4CAF50'
+            },
+            hovertemplate: '%{x|%Y-%m-%d}<br>DFR: %{y:.3f}%<extra></extra>'
+        };
+        
+        const mlfTrace = {
+            x: dates,
+            y: mlfRates,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'MLF',
+            line: {
+                width: 2,
+                color: '#F44336'
+            },
+            hovertemplate: '%{x|%Y-%m-%d}<br>MLF: %{y:.3f}%<extra></extra>'
+        };
+        
+        const eoniaTrace = {
+            x: dates,
+            y: eoniaRates,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'EONIA',
+            line: {
+                width: 2,
+                dash: 'dash',
+                color: 'rgba(176,196,222,0.8)'
+            },
+            hovertemplate: '%{x|%Y-%m-%d}<br>EONIA: %{y:.3f}%<extra></extra>'
+        };
+        
+        const estrTrace = {
+            x: dates,
+            y: estrRates,
+            type: 'scatter',
+            mode: 'lines',
+            name: '€STR',
+            line: {
+                width: 2,
+                dash: 'dash',
+                color: 'rgba(240,128,128,0.8)'
+            },
+            hovertemplate: '%{x|%Y-%m-%d}<br>€STR: %{y:.3f}%<extra></extra>'
+        };
+        
+        const data = [mroTrace, dfrTrace, mlfTrace, eoniaTrace, estrTrace];
+        
+        const layout = {
+            title: 'ECB Key Interest Rates and Reference Rates',
+            xaxis: {
+                title: 'Date',
+                showgrid: true,
+                gridwidth: 1,
+                gridcolor: 'rgba(128,128,128,0.2)'
+            },
+            yaxis: {
+                title: 'Rate (%)',
+                showgrid: true,
+                gridwidth: 1,
+                gridcolor: 'rgba(128,128,128,0.2)'
+            },
+            hovermode: 'x unified',
+            plot_bgcolor: 'white',
+            legend: {
+                yanchor: 'top',
+                y: 0.99,
+                xanchor: 'left',
+                x: 0.01
+            },
+            margin: {
+                l: 50,
+                r: 50,
+                t: 50,
+                b: 50
+            },
+            autosize: true
+        };
+
+        const config = {
+            responsive: true,
+            displayModeBar: true,
+            displaylogo: false,
+            modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+            toImageButtonOptions: {
+                format: 'png',
+                filename: 'ecb_rates_chart',
+                height: 500,
+                width: 900,
+                scale: 2
+            }
+        };
+        
+        Plotly.newPlot('myPlot', data, layout, config);
+
+        // Make the plot responsive
+        window.onresize = function() {
+            Plotly.relayout('myPlot', {
+                'xaxis.autorange': true,
+                'yaxis.autorange': true
+            });
+        };
+    </script>
+</body>
+</html> 
