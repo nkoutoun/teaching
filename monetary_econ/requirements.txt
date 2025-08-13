@@ -1,0 +1,3 @@
+ecbdata>=0.0.9
+pandas>=1.0.0
+plotly>=5.0.0 
